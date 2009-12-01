@@ -3,8 +3,6 @@
 
 (in-package :cl-tidy.script)
 
-(asdf:operate 'asdf:load-op :paren-files)
-
 (defsystem :cl-tidy
   :description ""
   :version "0.0.1"
