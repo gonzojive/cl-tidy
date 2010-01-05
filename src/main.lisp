@@ -169,3 +169,46 @@
     (let ((string (make-string (file-length strm))))
       (read-sequence string strm)
       string)))
+
+
+
+;;
+;; mods/additions to cl-tidy: 
+;; facilitate check for tidy 'errors' and/or 'warnings'
+;;
+
+
+
+;; tidy docs indicate "Must call tidyCleanAndRepair() first."
+;; - returns 
+;;     1 if any warnings
+;;     0 if tidy is happy
+(defcfun ("tidyRunDiagnostics" tidy-run-diagnostics) :int
+  (tdoc tidy-doc))
+
+;; number of tidy warnings encountered
+(defcfun ("tidyWarningCount" tidy-warning-count) :uint
+  (tdoc tidy-doc))
+
+(defcfun ("tidyErrorCount" tidy-error-count) :uint
+  (tdoc tidy-doc))
+
+;; write info to error sink
+;; TODO: implement code for error sink/buffer
+(defcfun ("tidyErrorSummary" tidy-error-summary) :void
+  (tdoc tidy-doc))
+
+
+;; note: desirable to return warning and error counts in context of CLEAN-UP-HTML (e.g., as second and third values)?
+(defun check-html (string)
+  (with-tidy-doc (doc)
+    (with-tidy-buffer (buf)
+      (tidy-parse-string doc string)
+      (tidy-clean-and-repair doc)
+      (tidy-run-diagnostics doc)
+      (values
+       (tidy-warning-count doc)
+       (tidy-error-count doc)
+       ))))
+
+
