@@ -1,7 +1,9 @@
 (in-package :cl-tidy)
 
 (define-foreign-library libtidy
-  (:unix (:or "/git/suave/cl-tidy/tidylib/lib/libtidy.so")))
+  (:unix (:or "libtidy.so"
+	      "/usr/local/lib/libtidy.so"
+	      "/git/suave/cl-tidy/tidylib/lib/libtidy.so")))
 
 (use-foreign-library libtidy)
 
@@ -148,6 +150,13 @@
        
 
 (defun clean-up-html (string)
+  "Given an HTML string, `string`, runs the input through Tidy. If
+Tidy can handle the input, returns a version of the document that is valid
+XHTML.
+
+Thus, most dirty web pages from the internet can be grabbed run
+through `CLEAN-UP-HTML` and subsequently passed into a strict XML
+parser."
   (declare (optimize debug))
   (with-tidy-doc (doc)
     (with-tidy-buffer (buf)

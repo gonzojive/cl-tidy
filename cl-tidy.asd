@@ -15,3 +15,16 @@
 			 )))
 
   :depends-on ("cffi"))
+
+
+(defsystem :cl-tidy.doc
+  :description ""
+  :version "0.0.1"
+  :author "Red Daly <reddaly at gmail.com>"
+  :license "No one is licensed to use this, not even myself."
+  :components ((:module "doc"
+			:components
+			((:file "cl-tidy-docdown")
+			 )))
+
+  :depends-on ("cl-tidy" "docdown"))
