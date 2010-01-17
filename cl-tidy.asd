@@ -4,10 +4,10 @@
 (in-package :cl-tidy.script)
 
 (defsystem :cl-tidy
-  :description ""
+  :description "FFI bindings for HTML Tidy"
   :version "0.0.1"
   :author "Red Daly <reddaly at gmail.com>"
-  :license "No one is licensed to use this, not even myself."
+  :license "BSD sans ad-clause"
   :components ((:module "src"
 			:components
 			((:file "package")
@@ -15,6 +15,10 @@
 			 )))
 
   :depends-on ("cffi"))
+
+(setf (asdf:component-property (asdf:find-system :cl-tidy) :website)
+      "http://github.com/gonzojive/cl-tidy")
+      
 
 
 (defsystem :cl-tidy.doc

@@ -6,6 +6,7 @@
 (progn
   (defdoc index :page
     (:title "CL-Tidy")
+    (:systems :cl-tidy); :cl-tidy.doc)
     (:content
      "#### [HTML Tidy](http://sourceforge.net/projects/tidy/) for Common Lisp
 
