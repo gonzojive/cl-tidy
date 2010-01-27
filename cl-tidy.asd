@@ -5,9 +5,9 @@
 
 (defsystem :cl-tidy
   :description "FFI bindings for HTML Tidy"
-  :version "0.0.1"
+  :version "0.0.2"
   :author "Red Daly <reddaly at gmail.com>"
-  :license "BSD sans ad-clause"
+  :license "MIT License"
   :components ((:module "src"
 			:components
 			((:file "package")
