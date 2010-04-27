@@ -147,7 +147,13 @@
   `(with-foreign-object (,var 'tidy-buffer)
      (init-tidy-buffer ,var)
      ,@body))
-       
+
+(defmacro without-interrupts (&body body)
+  "Run BODY with interrupts disabled."
+  #+allegro `(excl:without-interrupts ,@body)
+  #+sbcl `(sb-sys:without-interrupts ,@body)
+  #-(or allegro sbcl) `(progn ,@body))
+
 
 (defun clean-up-html (string)
   "Given an HTML string, `string`, runs the input through Tidy. If
@@ -158,18 +164,19 @@ Thus, most dirty web pages from the internet can be grabbed run
 through `CLEAN-UP-HTML` and subsequently passed into a strict XML
 parser."
   (declare (optimize debug))
-  (with-tidy-doc (doc)
-    (with-tidy-buffer (buf)
-      (tidy-opt-set-bool doc :xhtml-out :yes)
-      ;;(tidy-opt-set-bool doc :xml-out :yes)
-      ;;(tidy-opt-set-bool doc :tidy-quote-ampersand :yes)
-      ;;(tidy-opt-set-bool doc :tidy-quote-nbsp :yes)
-      (tidy-opt-set-bool doc :tidy-num-entities :yes)
-      ;;(tidy-opt-set-bool doc :tidy-body-only :no)
-      (tidy-parse-string doc string)
-      (tidy-clean-and-repair doc)
-      (tidy-save-buffer doc buf)
-      (convert-from-foreign (foreign-slot-value buf 'tidy-buffer 'bp) :string))))
+  (without-interrupts
+    (with-tidy-doc (doc)
+      (with-tidy-buffer (buf)
+        (tidy-opt-set-bool doc :xhtml-out :yes)
+        ;;(tidy-opt-set-bool doc :xml-out :yes)
+        ;;(tidy-opt-set-bool doc :tidy-quote-ampersand :yes)
+        ;;(tidy-opt-set-bool doc :tidy-quote-nbsp :yes)
+        (tidy-opt-set-bool doc :tidy-num-entities :yes)
+        ;;(tidy-opt-set-bool doc :tidy-body-only :no)
+        (tidy-parse-string doc string)
+        (tidy-clean-and-repair doc)
+        (tidy-save-buffer doc buf)
+        (convert-from-foreign (foreign-slot-value buf 'tidy-buffer 'bp) :string)))))
 
 
 (defun slurp-file-3000 (pathname)

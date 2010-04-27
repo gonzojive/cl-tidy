@@ -1,0 +1,98 @@
+? mixed-cdata-text-node-inside-script.patch
+Index: src/lexer.c
+===================================================================
+RCS file: /cvsroot/tidy/tidy/src/lexer.c,v
+retrieving revision 1.194
+diff -u -r1.194 lexer.c
+--- src/lexer.c	22 Mar 2008 21:06:55 -0000	1.194
++++ src/lexer.c	18 Dec 2009 23:04:55 -0000
+@@ -1797,7 +1797,8 @@
+ {
+     CDATA_INTERMEDIATE,
+     CDATA_STARTTAG,
+-    CDATA_ENDTAG
++    CDATA_ENDTAG,
++    CDATA_INNER_CDATA
+ } CDATAState;
+ 
+ static Node *GetCDATA( TidyDocImpl* doc, Node *container )
+@@ -1819,9 +1820,68 @@
+     /* seen start tag, look for matching end tag */
+     while ((c = TY_(ReadChar)(doc->docIn)) != EndOfStream)
+     {
++        if (state == CDATA_INNER_CDATA) {
++            
++            if (c == EndOfStream)
++                break;
++            if (c != ']') {
++                TY_(AddCharToLexer)(lexer, c);
++                lexer->txtend = lexer->lexsize;
++                continue;
++            }
++
++            c = TY_(ReadChar)(doc->docIn);
++            if (c == EndOfStream)
++                break;
++
++            if (c != ']') {
++                TY_(AddCharToLexer)(lexer, c);
++                TY_(AddCharToLexer)(lexer, ']');
++                lexer->txtend = lexer->lexsize;
++                continue;
++            }
++            
++            c = TY_(ReadChar)(doc->docIn);
++            if (c == EndOfStream)
++                break;
++
++            if (c != '>') {
++                TY_(AddCharToLexer)(lexer, c);
++                TY_(AddCharToLexer)(lexer, ']');
++                TY_(AddCharToLexer)(lexer, ']');
++                lexer->txtend = lexer->lexsize;
++                continue;
++            }
++            
++            state = CDATA_INTERMEDIATE;
++            continue;
++        }
++        else if (state == CDATA_INTERMEDIATE && c == '<') {
++            const char * cdata_the_string = "![CDATA[";
++            uint peeked_chars[8];
++            int j;
++            for (j=0; j < 8; j++) {
++                peeked_chars[j] = TY_(ReadChar)(doc->docIn);
++                if (peeked_chars[j] != cdata_the_string[j]) {
++                    /* this is NOT a CDATA start tag, so unget all the accumulated
++                       characters and let the rest of the loop figure out what to do */
++                    int k;
++                    for (k=j; k >= 0; k--) {
++                        TY_(UngetChar)(peeked_chars[k], doc->docIn);
++                    }
++                    break;
++                }
++            }
++            if (j == 8) {
++                /* We are now in INNER_CDATA mode, which means we only look for ]]> */
++                state = CDATA_INNER_CDATA;
++                continue;
++            }
++        }
++
+         TY_(AddCharToLexer)(lexer, c);
+         lexer->txtend = lexer->lexsize;
+-
++        
+         if (state == CDATA_INTERMEDIATE)
+         {
+             if (c != '<')
+@@ -1889,6 +1949,7 @@
+ 
+                 start = lexer->lexsize;
+                 state = CDATA_ENDTAG;
++                
+             }
+             else
+             {
+
+ 	  	 
