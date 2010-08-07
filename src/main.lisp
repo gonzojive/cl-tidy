@@ -2,12 +2,13 @@
 
 (define-foreign-library libtidy
   (:unix (:or "libtidy.so"
+	      "/git/cl-tidy/lib/libtidy.so"
 	      "/usr/local/lib/libtidy.so"
 	      "/git/suave/cl-tidy/tidylib/lib/libtidy.so")))
 
 (use-foreign-library libtidy)
 
-(defctype tidy-doc :int)
+(defctype tidy-doc :pointer)
 
 (defcstruct tidy-buffer
   (allocator :pointer)
@@ -154,7 +155,6 @@
   #+sbcl `(sb-sys:without-interrupts ,@body)
   #-(or allegro sbcl) `(progn ,@body))
 
-
 (defun clean-up-html (string)
   "Given an HTML string, `string`, runs the input through Tidy. If
 Tidy can handle the input, returns a version of the document that is valid
@@ -167,12 +167,18 @@ parser."
   (without-interrupts
     (with-tidy-doc (doc)
       (with-tidy-buffer (buf)
-        (tidy-opt-set-bool doc :xhtml-out :yes)
+      
         ;;(tidy-opt-set-bool doc :xml-out :yes)
         ;;(tidy-opt-set-bool doc :tidy-quote-ampersand :yes)
         ;;(tidy-opt-set-bool doc :tidy-quote-nbsp :yes)
-        (tidy-opt-set-bool doc :tidy-num-entities :yes)
         ;;(tidy-opt-set-bool doc :tidy-body-only :no)
+        
+        (tidy-opt-set-bool doc :tidyshowwarnings :no)
+        (tidy-opt-set-bool doc :xhtml-out :yes)
+
+        (tidy-opt-set-bool doc :tidy-num-entities :yes)
+        
+        
         (tidy-parse-string doc string)
         (tidy-clean-and-repair doc)
         (tidy-save-buffer doc buf)
@@ -215,7 +221,8 @@ parser."
   (tdoc tidy-doc))
 
 
-;; note: desirable to return warning and error counts in context of CLEAN-UP-HTML (e.g., as second and third values)?
+;; note: desirable to return warning and error counts in context of
+;; CLEAN-UP-HTML (e.g., as second and third values)?
 (defun check-html (string)
   (with-tidy-doc (doc)
     (with-tidy-buffer (buf)
