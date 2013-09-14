@@ -3,6 +3,12 @@
 
 (in-package :cl-tidy.doc)
 
+(defun output-docs ()
+  (with-open-file (stream (asdf:system-relative-pathname (asdf:find-system :cl-tidy.doc)
+							 "doc/index.html")
+			  :direction :output :if-exists :supersede)
+    (write-string (generate-html-page 'index) stream)))
+
 (progn
   (defdoc index :page
     (:title "CL-Tidy")
@@ -42,14 +48,7 @@ You can also browse the code at [http://github.com/gonzojive/cl-tidy](http://git
        (:title "Functions")
        (:content "")
        (:children
-	(defdoc cl-tidy:clean-up-html :function)))))
+         (defdoc cl-tidy:clean-up-html :function)
+         (defdoc cl-tidy:clean-up-html-part :function)))))
 
   (output-docs))
-
-(defun output-docs ()
-  (with-open-file (stream (asdf:system-relative-pathname (asdf:find-system :cl-tidy.doc)
-							 "doc/index.html")
-			  :direction :output :if-exists :supersede)
-    (write-string (generate-html-page 'index) stream)))
-   
-  
