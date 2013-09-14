@@ -128,6 +128,11 @@
   (opt tidy-option)
   (val boolean))
 
+(defcfun ("tidyOptSetValue" tidy-opt-set-value) boolean
+         (tdoc tidy-doc)
+         (opt tidy-option)
+         (val :string))
+
 ;; Interface
 
 (defmacro with-tidy-doc ((var) &body body)
