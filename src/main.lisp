@@ -91,7 +91,7 @@
   :TidyEmacs ;           /**< If true format error output for GNU Emacs */
   :TidyEmacsFile ;       /**< Name of current Emacs file */
   :TidyLiteralAttribs ;  /**< If true attributes may use newlines */
-  :tidy-body-only ;        /**< Output BODY content only */
+  :show-body-only ;        /**< Output BODY content only */
   :TidyFixUri ;          /**< Applies URI encoding if necessary */
   :TidyLowerLiterals ;   /**< Folds known attribute values to lower case */
   :TidyHideComments ;    /**< Hides all (real) comments in output */
