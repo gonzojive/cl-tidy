@@ -95,7 +95,7 @@
   :TidyEmacs ;           /**< If true format error output for GNU Emacs */
   :TidyEmacsFile ;       /**< Name of current Emacs file */
   :TidyLiteralAttribs ;  /**< If true attributes may use newlines */
-  :tidy-body-only ;        /**< Output BODY content only */
+  :show-body-only ;        /**< Output BODY content only */
   :TidyFixUri ;          /**< Applies URI encoding if necessary */
   :TidyLowerLiterals ;   /**< Folds known attribute values to lower case */
   :TidyHideComments ;    /**< Hides all (real) comments in output */
@@ -131,6 +131,11 @@
   (tdoc tidy-doc)
   (opt tidy-option)
   (val boolean))
+
+(defcfun ("tidyOptSetValue" tidy-opt-set-value) boolean
+         (tdoc tidy-doc)
+         (opt tidy-option)
+         (val :string))
 
 ;; Interface
 
@@ -175,7 +180,6 @@ parser."
         ;;(tidy-opt-set-bool doc :xml-out :yes)
         ;;(tidy-opt-set-bool doc :tidy-quote-ampersand :yes)
         ;;(tidy-opt-set-bool doc :tidy-quote-nbsp :yes)
-        ;;(tidy-opt-set-bool doc :tidy-body-only :no)
         
         (tidy-opt-set-bool doc :tidyshowwarnings :no)
         (tidy-opt-set-bool doc :xhtml-out :yes)
@@ -183,6 +187,27 @@ parser."
         (tidy-opt-set-bool doc :tidy-num-entities :yes)
         
         
+        (tidy-parse-string doc string)
+        (tidy-clean-and-repair doc)
+        (tidy-save-buffer doc buf)
+        (convert-from-foreign (foreign-slot-value buf 'tidy-buffer 'bp) :string)))))
+
+(defun clean-up-html-part (string)
+  "Similar to `CLEAN-UP-HTML` but returns html 
+   without wrapping it into <html> and <body> tags, 
+   see show-body-only tidy option"
+  (declare (optimize debug))
+  (without-interrupts
+    (with-tidy-doc (doc)
+      (with-tidy-buffer (buf)
+        (tidy-opt-set-value doc :show-body-only "yes")
+
+        (tidy-opt-set-bool doc :tidyshowwarnings :no)
+        (tidy-opt-set-bool doc :xhtml-out :yes)
+
+        (tidy-opt-set-bool doc :tidy-num-entities :yes)
+
+
         (tidy-parse-string doc string)
         (tidy-clean-and-repair doc)
         (tidy-save-buffer doc buf)
