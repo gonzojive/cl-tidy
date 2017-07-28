@@ -1,10 +1,14 @@
 (in-package :cl-tidy)
 
 (define-foreign-library libtidy
+  (:darwin (:or "libtidy.dylib"
+                "/usr/local/lib/libtidy.dylib"))
   (:unix (:or "libtidy.so"
-	      "/git/cl-tidy/lib/libtidy.so"
-	      "/usr/local/lib/libtidy.so"
-	      "/git/suave/cl-tidy/tidylib/lib/libtidy.so")))
+              "/git/cl-tidy/lib/libtidy.so"
+              "/usr/local/lib/libtidy.so"
+              "/git/suave/cl-tidy/tidylib/lib/libtidy.so"))
+  (:windows "libTidy.dll")
+  (t (:default "libtidy")))
 
 (use-foreign-library libtidy)
 
